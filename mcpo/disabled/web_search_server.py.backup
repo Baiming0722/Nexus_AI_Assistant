@@ -1,0 +1,163 @@
+	# pip install mcp httpx beautifulsoup4
+#!/usr/bin/env python3
+import asyncio
+import sys
+import json
+from typing import Any, Optional
+import httpx
+from bs4 import BeautifulSoup
+from mcp.server.models import InitializationOptions
+from mcp.server import NotificationOptions, Server
+from mcp.server.stdio import stdio_server
+from mcp.types import (
+    Tool,
+    TextContent,
+    CallToolResult,
+    ErrorData,
+)
+
+class SearchResult:
+    def __init__(self, title: str, url: str, description: str):
+        self.title = title
+        self.url = url
+        self.description = description
+    
+    def to_dict(self):
+        return {
+            "title": self.title,
+            "url": self.url,
+            "description": self.description
+        }
+
+def is_valid_search_args(args: Any) -> bool:
+    """驗證搜尋參數"""
+    if not isinstance(args, dict):
+        return False
+    if "query" not in args or not isinstance(args["query"], str):
+        return False
+    if "limit" in args and not isinstance(args["limit"], (int, float)):
+        return False
+    return True
+
+async def perform_search(query: str, limit: int) -> list[SearchResult]:
+    """執行 Google 搜尋並解析結果"""
+    url = "https://www.google.com/search"
+    params = {"q": query}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, params=params, headers=headers, follow_redirects=True)
+        response.raise_for_status()
+    
+    soup = BeautifulSoup(response.text, 'html.parser')
+    results = []
+    
+    # 尋找搜尋結果容器
+    search_divs = soup.find_all('div', class_='g')
+    
+    for i, element in enumerate(search_divs):
+        if i >= limit:
+            break
+        
+        # 尋找標題
+        title_element = element.find('h3')
+        # 尋找連結
+        link_element = element.find('a')
+        # 尋找描述片段
+        snippet_element = element.find('div', class_='VwiC3b')
+        
+        if title_element and link_element:
+            url = link_element.get('href', '')
+            if url and url.startswith('http'):
+                results.append(SearchResult(
+                    title=title_element.get_text(),
+                    url=url,
+                    description=snippet_element.get_text() if snippet_element else ''
+                ))
+    
+    return results
+
+async def main():
+    """主程式入口"""
+    server = Server("web-search")
+    
+    @server.list_tools()
+    async def handle_list_tools() -> list[Tool]:
+        """列出可用的工具"""
+        return [
+            Tool(
+                name="search",
+                description="Search the web using Google (no API key required)",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": "Search query"
+                        },
+                        "limit": {
+                            "type": "number",
+                            "description": "Maximum number of results to return (default: 5)",
+                            "minimum": 1,
+                            "maximum": 10
+                        }
+                    },
+                    "required": ["query"]
+                }
+            )
+        ]
+    
+    @server.call_tool()
+    async def handle_call_tool(name: str, arguments: dict) -> CallToolResult:
+        """處理工具調用"""
+        if name != "search":
+            raise ValueError(f"Unknown tool: {name}")
+        
+        if not is_valid_search_args(arguments):
+            raise ValueError("Invalid search arguments")
+        
+        query = arguments["query"]
+        limit = min(arguments.get("limit", 5), 10)
+        
+        try:
+            results = await perform_search(query, limit)
+            results_dict = [r.to_dict() for r in results]
+            
+            return CallToolResult(
+                content=[
+                    TextContent(
+                        type="text",
+                        text=json.dumps(results_dict, indent=2, ensure_ascii=False)
+                    )
+                ]
+            )
+        except httpx.HTTPError as e:
+            return CallToolResult(
+                content=[
+                    TextContent(
+                        type="text",
+                        text=f"Search error: {str(e)}"
+                    )
+                ],
+                isError=True
+            )
+    
+    async with stdio_server() as (read_stream, write_stream):
+        print("Web Search MCP server running on stdio", file=sys.stderr)
+        await server.run(
+            read_stream,
+            write_stream,
+            InitializationOptions(
+                server_name="web-search",
+                server_version="0.1.0",
+                capabilities=server.get_capabilities(
+                    notification_options=NotificationOptions(),
+                    experimental_capabilities={}
+                )
+            )
+        )
+
+if __name__ == "__main__":
+    asyncio.run(main())

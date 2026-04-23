@@ -1,0 +1,81 @@
+{
+  "mcpServers": {
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ]
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-fetch"
+      ]
+    },
+    "time": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-time",
+        "--local-timezone=America/New_York"
+      ]
+    },
+    "taiwan_time": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-time",
+        "--local-timezone=Asia/Taipei"
+      ]
+    },
+    "get_time": {
+      "command": ".venv/Scripts/python.exe",
+      "args": [
+        "C:/Users/USER/PycharmProjects/JupyterProject/mcpo/get_time_server.py"
+      ]
+    },
+    "calculator": {
+      "command": ".venv/Scripts/python.exe",
+      "args": [
+        "C:/Users/USER/PycharmProjects/JupyterProject/mcpo/calculator_server.py"
+      ]
+    },
+    "ffmpeg": {
+      "command": ".venv/Scripts/python.exe",
+      "args": [
+        "C:/Users/USER/PycharmProjects/JupyterProject/mcpo/ffmpeg_server.py"
+      ]
+    },
+    "web_search": {
+      "command": ".venv/Scripts/python.exe",
+      "args": [
+        "C:/Users/USER/PycharmProjects/JupyterProject/mcpo/web_search_server.py"
+      ]
+    },
+    "filesystem": {
+      "command": ".venv/Scripts/python.exe",
+      "args": [
+        "C:/Users/USER/PycharmProjects/JupyterProject/mcpo/filesystem_server.py",
+        "--project-dir",
+        "C:/Users/USER/PycharmProjects/JupyterProject/"
+      ]
+    },
+    "daily_life": {
+      "command": ".venv/Scripts/python.exe",
+      "args": [
+        "C:/Users/USER/PycharmProjects/JupyterProject/mcpo/daily_life_server.py"
+      ],
+      "env": {
+        "PYTHONIOENCODING": "utf-8"
+      }
+    },
+    "web_search_deeply": {
+      "command": ".venv/Scripts/python.exe",
+      "args": [
+        "C:/Users/USER/PycharmProjects/JupyterProject/mcpo/web_search_deeply_server.py"
+      ],
+      "env": {
+        "PYTHONIOENCODING": "utf-8"
+      }
+    }
+  }
+}

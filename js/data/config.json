@@ -1,0 +1,20 @@
+{
+  "LLM_bot": {
+    "ip": "localhost:7860/api/chat/completions",
+    "models": "ollama list",
+    "model": "qwen3.5:latest",
+    "apikey": "Bearer ..."
+  },
+  "༄҉͡‿҉࿑專𓍯ౣ題ళ్శ్హ": {
+    "ip": "localhost:7860/api/chat/completions",
+    "models": "ollama list",
+    "model": "qwen3.5:latest",
+    "apikey": "Bearer ..."
+  },
+  "Discord_LLM_bot": {
+    "ip": "localhost:7860/api/chat/completions",
+    "models": "ollama list",
+    "model": "minimax-m2.7:cloud",
+    "apikey": "Bearer ..."
+  }
+}

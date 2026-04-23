@@ -1,0 +1,14 @@
+{
+  "Baiming": {
+    "name": "Baiming",
+    "password": "$2b$10$n1CzdGgerif1LGD3qnb71.8NY49A.lVaSFg7rCXUoPo1p3IVD5uVy"
+  },
+  "1060166qaz": {
+    "name": "江西",
+    "password": "$2b$10$fARHYR009Hd0mVJg6eujW.lWlmkZneQp/mf1S5kX.gBVW5DXKuHPq"
+  },
+  "root": {
+    "name": "root",
+    "password": "$2b$10$bWuYNOWVG5NawmKiXIMFheTdRv9CjqDgk053HISsQM37CpQ5YlByO"
+  }
+}

@@ -1,0 +1,6 @@
+mcpo --port 8000 -- uvx mcp-server-fetch
+mcpo --config ./config.json --port 7861
+open-webui serve --host 127.0.0.1 --port 7860
+node js/index.js
+
+consol.info(`${'─'.repeat(60)}`);

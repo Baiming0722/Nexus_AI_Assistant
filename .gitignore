@@ -1,0 +1,22 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.ruff_cache/
+
+# IDEs
+.idea/
+.vscode/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Project specific
+.webui_secret_key
+js/data/history/
+js/log/
+*.log

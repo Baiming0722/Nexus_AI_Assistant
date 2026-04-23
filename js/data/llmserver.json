@@ -1,0 +1,14 @@
+{
+    "openwebui": {
+        "ip": "localhost:7860/api/chat/completions",
+        "models": "ollama list",
+        "model": "gemini-3-flash-preview:latest",
+        "apikey":"Bearer ..."
+    },
+    "ollama":{
+        "ip": "localhost:11434/api/chat",
+        "models":"ollama list",
+        "model":"gemini-3-flash-preview:latest",
+        "apikey":""
+    }
+}

@@ -1,0 +1,8 @@
+{
+    "token": "...",
+    "prefix": "/",
+    "clientId": "...",
+    "clientSecret": "...",
+    "REDIRECT_URI": "http://localhost:3000/callback",
+    "sessionSecret": "123"
+}

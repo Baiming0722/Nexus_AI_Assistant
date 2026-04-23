@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>專題首頁</title>
+    <link rel="icon" href="favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Scripts -->
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/common.css">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            cursor: default;
+        }
+
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-gray-50 dark:bg-darkBg text-gray-800 dark:text-gray-200 min-h-screen flex flex-col transition-colors duration-300 selection:bg-primary/30 selection:text-primary">
+    <div id="app" v-cloak class="flex flex-col min-h-screen">
+        <!-- Navigation -->
+        <header
+            class="sticky top-0 z-50 bg-white/80 dark:bg-darkBg/80 backdrop-blur-lg shadow-sm border-b border-gray-100 dark:border-gray-800 transition-all duration-300">
+            <div class="container mx-auto px-4 py-3">
+                <nav class="flex flex-col md:flex-row items-center justify-between">
+                    <div class="flex items-center w-full md:w-auto justify-between">
+                        <a href="/" class="text-2xl font-black text-primary group flex items-center">
+                            <div
+                                class="bg-primary/10 text-primary p-2 rounded-xl mr-3 group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                            </div>
+                            <span class="tracking-wider">首頁</span>
+                        </a>
+                        <div class="flex items-center gap-2">
+                            <!-- Use darkModeToggle ID for common.js interop -->
+                            <button id="darkModeToggle"
+                                class="dark-mode-toggle p-2 text-xl hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors duration-300"></button>
+                            <button @click="toggleMobileMenu"
+                                class="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 6h16M4 12h16m-7 6h7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Menu Display based on Mobile State and Auth -->
+                    <div :class="{'hidden': !mobileMenuOpen, 'flex': mobileMenuOpen}"
+                        class="md:flex flex-col md:flex-row w-full md:w-auto mt-4 md:mt-0 space-y-4 md:space-y-0 md:space-x-8 items-center transition-all">
+                        <a href="/"
+                            class="font-medium text-primary relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-full after:h-0.5 after:bg-primary transition-colors">首頁</a>
+                        <a href="/chat"
+                            class="font-medium text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors">Nexus
+                            AI</a>
+
+                        <!-- Login Button (Not Logged In) -->
+                        <a v-if="!isLoggedIn" href="/login"
+                            class="font-medium text-white bg-primary px-6 py-2.5 rounded-full shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:bg-opacity-90 hover:-translate-y-0.5 transition-all duration-300 text-center">
+                            登入
+                        </a>
+
+                        <!-- User Profile Info (Logged In) -->
+                        <div v-else
+                            class="flex justify-center items-center gap-3 bg-gray-50 dark:bg-[#1a1a1a] px-5 py-2 rounded-full border border-gray-100 dark:border-gray-800 shadow-sm transition-transform hover:scale-105">
+                            <img v-if="getAvatarUrl()" :src="getAvatarUrl()"
+                                class="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm"
+                                alt="Avatar">
+                            <div v-else
+                                class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+                                {{ userInfo?.userinfo?.global_name?.[0] || 'U' }}
+                            </div>
+                            <span class="font-bold text-sm text-gray-800 dark:text-gray-200">{{
+                                userInfo?.userinfo?.global_name || userInfo?.userinfo?.username }}</span>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section
+            class="relative bg-gradient-to-br from-primary/10 via-purple-50 to-blue-50 dark:from-primary/20 dark:via-purple-900/20 dark:to-blue-900/10 py-24 md:py-32 overflow-hidden flex-shrink-0">
+            <div class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+                <div
+                    class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-primary/20 blur-3xl opacity-50 mix-blend-multiply dark:mix-blend-overlay">
+                </div>
+                <div
+                    class="absolute top-1/3 -right-32 w-[30rem] h-[30rem] rounded-full bg-purple-300/30 dark:bg-purple-800/30 blur-3xl opacity-50 mix-blend-multiply dark:mix-blend-overlay">
+                </div>
+            </div>
+
+            <div class="container mx-auto px-4 text-center relative z-10">
+                <div
+                    class="inline-block mb-6 px-4 py-1.5 rounded-full bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-200 dark:border-gray-700 text-sm font-semibold text-primary shadow-sm hover:scale-105 transition-transform cursor-pointer">
+                    <span v-if="isLoggedIn">👋 歡迎回來，{{ userInfo?.userinfo?.global_name || '使用者' }}</span>
+                    <span v-else>✨ 全新體驗上線</span>
+                </div>
+                <h1
+                    class="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 tracking-tight text-gray-900 dark:text-white drop-shadow-sm">
+                    歡迎來到我們的<span
+                        class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">專題網站</span>
+                </h1>
+                <p class="text-lg md:text-xl max-w-2xl mx-auto mb-10 text-gray-600 dark:text-gray-300 leading-relaxed">
+                    這是一個專注於高科大的導覽指南，帶您一步步探索我們所提供的服務和內容，啟程前往您的專屬體驗。
+                </p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="/chat"
+                        class="flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-full font-bold shadow-xl shadow-primary/40 hover:shadow-primary/60 hover:-translate-y-1 transition-all duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        進入高科網頁導覽
+                    </a>
+                    <a href="#about"
+                        class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 px-8 py-4 rounded-full font-bold shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 hover:-translate-y-1 transition-all duration-300">
+                        了解更多資訊
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Us Section -->
+        <section id="about"
+            class="py-24 bg-white dark:bg-darkBg relative z-10 before:content-[''] before:absolute before:inset-0 before:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiNlN2U1ZTQiIGZpbGwtb3BhY2l0eT0iLjQiLz48L3N2Zz4=')] before:opacity-50 dark:before:opacity-10 pointer-events-none flex-shrink-0">
+            <div class="container mx-auto px-4 relative pointer-events-auto">
+                <div class="max-w-4xl mx-auto">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl md:text-4xl font-extrabold mb-4 text-gray-900 dark:text-white">關於我們</h2>
+                        <div class="w-16 h-1.5 bg-gradient-to-r from-primary to-purple-500 mx-auto rounded-full"></div>
+                    </div>
+
+                    <div
+                        class="bg-white/80 dark:bg-[#1a1a1a]/80 backdrop-blur-xl p-8 md:p-12 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 relative overflow-hidden group">
+                        <div
+                            class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 transition-transform duration-700 group-hover:scale-110">
+                        </div>
+                        <div
+                            class="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3 transition-transform duration-700 group-hover:scale-110">
+                        </div>
+
+                        <div class="relative z-10 text-center">
+                            <p class="mb-6 text-xl text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
+                                我們來自高雄科技大學<span class="text-primary font-bold">電腦通訊系</span>，此網頁為本專題主要入口。
+                            </p>
+                            <p class="text-lg text-gray-600 dark:text-gray-400 mb-12">
+                                目前系統處於開發階段，主要任務為提供高科大專屬網頁指南與導覽。
+                            </p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div
+                                    class="bg-gray-50/80 dark:bg-gray-800/50 p-6 rounded-2xl hover:shadow-lg hover:bg-white dark:hover:bg-gray-700 hover:-translate-y-2 transition-all duration-300 border border-transparent hover:border-primary/20 text-center flex flex-col items-center">
+                                    <div
+                                        class="bg-primary/10 dark:bg-primary/20 w-16 h-16 rounded-2xl mb-4 flex items-center justify-center text-primary transition-colors duration-300 shadow-inner group-hover:bg-primary group-hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20"
+                                            fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <h3 class="font-bold text-xl text-gray-800 dark:text-gray-200">不專業諮詢</h3>
+                                </div>
+                                <div
+                                    class="bg-gray-50/80 dark:bg-gray-800/50 p-6 rounded-2xl hover:shadow-lg hover:bg-white dark:hover:bg-gray-700 hover:-translate-y-2 transition-all duration-300 border border-transparent hover:border-purple-500/20 text-center flex flex-col items-center">
+                                    <div
+                                        class="bg-purple-500/10 dark:bg-purple-500/20 w-16 h-16 rounded-2xl mb-4 flex items-center justify-center text-purple-500 transition-colors duration-300 shadow-inner group-hover:bg-purple-500 group-hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20"
+                                            fill="currentColor">
+                                            <path
+                                                d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+                                        </svg>
+                                    </div>
+                                    <h3 class="font-bold text-xl text-gray-800 dark:text-gray-200">團隊沒空支持</h3>
+                                </div>
+                                <div
+                                    class="bg-gray-50/80 dark:bg-gray-800/50 p-6 rounded-2xl hover:shadow-lg hover:bg-white dark:hover:bg-gray-700 hover:-translate-y-2 transition-all duration-300 border border-transparent hover:border-blue-500/20 text-center flex flex-col items-center">
+                                    <div
+                                        class="bg-blue-500/10 dark:bg-blue-500/20 w-16 h-16 rounded-2xl mb-4 flex items-center justify-center text-blue-500 transition-colors duration-300 shadow-inner group-hover:bg-blue-500 group-hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20"
+                                            fill="currentColor">
+                                            <path
+                                                d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                                        </svg>
+                                    </div>
+                                    <h3 class="font-bold text-xl text-gray-800 dark:text-gray-200">不定期資源更新</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Content Section -->
+        <section class="py-24 bg-gray-50/50 dark:bg-darkBg/50 flex-grow">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-extrabold mb-4 text-gray-900 dark:text-white">服務內容</h2>
+                    <div class="w-16 h-1.5 bg-gradient-to-r from-primary to-purple-500 mx-auto rounded-full"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div
+                        class="group bg-white dark:bg-[#1a1a1a] rounded-3xl shadow-sm hover:shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden transition-all duration-500 hover:-translate-y-2">
+                        <div
+                            class="h-56 bg-primary/10 dark:bg-primary/5 flex items-center justify-center relative overflow-hidden">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-28 w-28 text-primary group-hover:scale-110 transition-transform duration-500"
+                                viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="p-8">
+                            <h3 class="font-bold text-2xl mb-3 text-gray-900 dark:text-white">用戶指南</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-6 line-clamp-2">了解如何充分利用我們的平台和服務，提升您的使用體驗。</p>
+                            <a href="/chat"
+                                class="inline-flex items-center text-primary font-bold hover:text-primary/80 group-hover:underline transition-all">查看更多
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="h-5 w-5 ml-1 transform group-hover:translate-x-1 transition-transform"
+                                    viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+                                        clip-rule="evenodd" />
+                                </svg></a>
+                        </div>
+                    </div>
+                    <div
+                        class="group bg-white dark:bg-[#1a1a1a] rounded-3xl shadow-sm hover:shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden transition-all duration-500 hover:-translate-y-2">
+                        <div
+                            class="h-56 bg-purple-500/10 dark:bg-purple-500/5 flex items-center justify-center relative overflow-hidden">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-28 w-28 text-purple-500 group-hover:scale-110 transition-transform duration-500"
+                                viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
+                                <path
+                                    d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
+                            </svg>
+                        </div>
+                        <div class="p-8">
+                            <h3 class="font-bold text-2xl mb-3 text-gray-900 dark:text-white">常見問題</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-6 line-clamp-2">查找關於我們服務的常見問題解答，快速解決您的疑問。</p>
+                            <a href="#"
+                                class="inline-flex items-center text-purple-600 dark:text-purple-400 font-bold hover:text-purple-500 group-hover:underline transition-all">查看更多
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="h-5 w-5 ml-1 transform group-hover:translate-x-1 transition-transform"
+                                    viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+                                        clip-rule="evenodd" />
+                                </svg></a>
+                        </div>
+                    </div>
+                    <div
+                        class="group bg-white dark:bg-[#1a1a1a] rounded-3xl shadow-sm hover:shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden transition-all duration-500 hover:-translate-y-2">
+                        <div
+                            class="h-56 bg-blue-500/10 dark:bg-blue-500/5 flex items-center justify-center relative overflow-hidden">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-28 w-28 text-blue-500 group-hover:scale-110 transition-transform duration-500"
+                                viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="p-8">
+                            <h3 class="font-bold text-2xl mb-3 text-gray-900 dark:text-white">最新資訊</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-6 line-clamp-2">了解我們平台的最新動態、功能更新和重要通知。</p>
+                            <a href="#"
+                                class="inline-flex items-center text-blue-600 dark:text-blue-400 font-bold hover:text-blue-500 group-hover:underline transition-all">查看更多
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="h-5 w-5 ml-1 transform group-hover:translate-x-1 transition-transform"
+                                    viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+                                        clip-rule="evenodd" />
+                                </svg></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-white dark:bg-[#121212] py-8 border-t border-gray-100 dark:border-gray-800 flex-shrink-0">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center space-x-3">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">© 2026 專題. 保留所有權利.</p>
+                    </div>
+                    <div class="flex space-x-4">
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:bg-primary/10 hover:text-primary dark:text-gray-400 dark:hover:bg-gray-700 transition-all hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor"
+                                viewBox="0 0 24 24">
+                                <path
+                                    d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
+                            </svg>
+                        </a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:bg-primary/10 hover:text-primary dark:text-gray-400 dark:hover:bg-gray-700 transition-all hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor"
+                                viewBox="0 0 24 24">
+                                <path
+                                    d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                            </svg>
+                        </a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:bg-primary/10 hover:text-primary dark:text-gray-400 dark:hover:bg-gray-700 transition-all hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor"
+                                viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- App Scripts -->
+    <script src="index.js"></script>
+    <!-- Common styling and logic -->
+    <script src="assets/common.js"></script>
+    <!-- Security Warning Component -->
+    <script src="security-warning.js"></script>
+</body>
+
+</html>

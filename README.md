@@ -13,7 +13,7 @@
 - **Discord 互動介面**：透過 Discord 機器人，提供直覺的文字和指令介面與 LLM 進行對話。
 - **多媒體附件處理**：支援解析 Discord 訊息中的多種檔案附件（包含 `.txt`, `.json`, `.md` 及 `.jpg`, `.png` 圖片），使 LLM 能直接讀取與理解檔案內容。
 - **混合工具執行 (Hybrid Tool Execution)**：
-  - **MCP 工具呼叫**：整合多個基於 MCPO 運行的伺服器（如 `code_runner`, `web_search`, `file_reader` 等），直接與本機連接。
+  - **MCP 工具呼叫**：整合多個基於 MCPO 運行的伺服器（如 `daily_life`, `web_search`, `filesystem` 等），直接與本機連接。
   - **Skill (自訂技能)**：支援直接執行獨立的腳本（如 `.py`, `.js`, `.md`）或基於 Prompt 的邏輯，由 LLM 動態決定所需的 Skill 並進行多階段推論（Multi-Round Inference），大幅提升靈活性。
 - **動態工具發現**：系統會在背景自動向 `mcpo` 伺服器查詢並更新可用的工具清單。
 - **日誌記錄**：詳細的日誌系統，用於追蹤機器人、執行歷程與工具的運行狀態。
@@ -40,8 +40,8 @@
 
 ### 1. 先決需求 (Prerequisites)
 
-- **Node.js** (v18 或更高版本)：用於運行 Discord 機器人。
-- **Python** (v3.10 或更高版本) 及 `uv` 環境管理工具：用於運行 MCP 工具伺服器與 Skill。
+- **Node.js** (v20)：用於運行 Discord 機器人。
+- **Python** (v3.11) 及 `uv` 環境管理工具：用於運行 MCP 工具伺服器與 Skill。
 - **LLM 服務端點**：支援 OpenAI Function Calling 的 LLM 服務 (如 OpenWebUI、Ollama 等)。
 - **Git**：用於複製專案儲存庫。
 

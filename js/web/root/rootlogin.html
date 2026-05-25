@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理員登入介面</title>
+    <script src="../../socket.io/socket.io.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+</head>
+<body class="bg-gray-50 dark:bg-darkBg text-gray-800 dark:text-darkText min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <!-- Dark Mode Toggle -->
+        <div class="absolute top-4 right-4">
+            <button id="darkModeToggle" class="dark-mode-toggle p-2 text-lg rounded-full hover:bg-gray-100 dark:hover:bg-darkInput"></button>
+        </div>
+        
+        <!-- Logo/Header -->
+        <div class="text-center mb-10">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-primary text-white rounded-full mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <h1 class="text-3xl font-bold">管理員登入</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">請輸入您的帳號和密碼</p>
+        </div>
+        
+        <!-- Login Form -->
+        <div class="bg-white dark:bg-darkBg rounded-xl shadow-lg p-8">
+            <form id="login" class="space-y-6">
+                <div>
+                    <label for="account" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">帳號</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <input id="account" name="account" type="text" placeholder="輸入帳號" required 
+                            class="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-base dark:bg-darkInput focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" />
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">密碼</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <input id="password" name="password" type="password" placeholder="輸入密碼" required 
+                            class="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-base dark:bg-darkInput focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" />
+                    </div>
+                </div>
+                
+                <div>
+                    <button type="submit" 
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                        登入系統
+                    </button>
+                </div>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <a href="/" class="text-sm text-primary hover:text-primary/80 transition-colors">
+                    返回首頁
+                </a>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center mt-8 text-sm text-gray-600 dark:text-gray-400">
+            © 2025 管理系統. 保留所有權利.
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="../assets/common.js"></script>
+    <script src="rootlogin_core.js"></script>
+    <script src="/security-warning.js"></script>
+</body>
+</html>
+<!-- 
+<!DOCTYPE html>
+<html>
+<head>
+    <title>管理員登入介面</title>
+    <script src="../../socket.io/socket.io.js"></script>
+</head>
+<body>
+    <form id="login">
+        <input id="account" placeholder="帳號" />
+        <input id="password" placeholder="密碼" /><button>送出</button>
+    </form>
+    <script src="rootlogin.js"></script>
+</body>
+</html>
+-->

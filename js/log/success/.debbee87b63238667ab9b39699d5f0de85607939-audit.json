@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 30
+    },
+    "auditLog": "C:\\Users\\USER\\Desktop\\專題\\專題V5\\js\\log\\success\\.debbee87b63238667ab9b39699d5f0de85607939-audit.json",
+    "files": [
+        {
+            "date": 1779717752507,
+            "name": "C:\\Users\\USER\\Desktop\\專題\\專題V5\\js\\log\\success\\success-2026-05-25.log",
+            "hash": "57eabf500557e63c7f4632be0667fb265440c5b46c1ae1529928ac027ef238f6"
+        }
+    ],
+    "hashType": "sha256"
+}

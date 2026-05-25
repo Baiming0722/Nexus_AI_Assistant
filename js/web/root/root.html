@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理員介面</title>
+    <script src="../../socket.io/socket.io.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+</head>
+<body class="bg-white dark:bg-darkBg text-gray-800 dark:text-darkText min-h-screen p-4 transition-colors duration-200">
+    <!-- Header with Dark Mode Toggle -->
+    <header class="mb-8">
+        <div class="container mx-auto max-w-6xl flex justify-between items-center py-4">
+            <h1 class="text-3xl font-bold text-primary">管理員介面</h1>
+            <button id="darkModeToggle" class="dark-mode-toggle p-2 text-lg rounded-full hover:bg-gray-100 dark:hover:bg-darkInput"></button>
+        </div>
+    </header>
+
+    <div class="container mx-auto max-w-6xl">
+        <!-- System Overview -->
+        <div class="bg-white dark:bg-darkBg rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">系統概覽</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-gray-50 dark:bg-darkInput rounded-lg p-4">
+                    <h3 class="text-lg font-medium text-gray-500 dark:text-gray-400">系統名稱</h3>
+                    <p id="system-name" class="text-xl font-semibold mt-1">載入中...</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-darkInput rounded-lg p-4">
+                    <h3 class="text-lg font-medium text-gray-500 dark:text-gray-400">作業系統</h3>
+                    <p id="os-info" class="text-xl font-semibold mt-1">載入中...</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-darkInput rounded-lg p-4">
+                    <h3 class="text-lg font-medium text-gray-500 dark:text-gray-400">CPU 型號</h3>
+                    <p id="cpu-model" class="text-xl font-semibold mt-1">載入中...</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-darkInput rounded-lg p-4">
+                    <h3 class="text-lg font-medium text-gray-500 dark:text-gray-400">總記憶體</h3>
+                    <p id="total-memory" class="text-xl font-semibold mt-1">載入中...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resource Usage Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- CPU Usage -->
+            <div class="bg-white dark:bg-darkBg rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold mb-4">CPU 使用率</h2>
+                <div class="relative">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-500 dark:text-gray-400">目前使用率</span>
+                        <span id="cpu-usage-percent" class="text-lg font-bold text-primary">0%</span>
+                    </div>
+                    <div class="h-64 flex items-center justify-center">
+                        <canvas id="cpu-chart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center">
+                        <p id="cpu-temp" class="text-sm text-gray-500 dark:text-gray-400">溫度: 載入中...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Memory Usage -->
+            <div class="bg-white dark:bg-darkBg rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold mb-4">記憶體使用率</h2>
+                <div class="relative">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-500 dark:text-gray-400">目前使用率</span>
+                        <span id="memory-usage-percent" class="text-lg font-bold text-primary">0%</span>
+                    </div>
+                    <div class="h-64 flex items-center justify-center">
+                        <canvas id="memory-chart"></canvas>
+                    </div>
+                    <div class="mt-4 grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">已使用</p>
+                            <p id="memory-used" class="font-semibold">0 GB</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">可用</p>
+                            <p id="memory-free" class="font-semibold">0 GB</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disk & Network -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Disk Information -->
+            <div class="bg-white dark:bg-darkBg rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold mb-4">硬碟資訊</h2>
+                <div id="disk-info" class="space-y-4">
+                    <p class="text-center text-gray-500 dark:text-gray-400">載入中...</p>
+                </div>
+            </div>
+
+            <!-- Network Statistics -->
+            <div class="bg-white dark:bg-darkBg rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold mb-4">網路統計</h2>
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-500 dark:text-gray-400">下載</h3>
+                        <div class="mt-2">
+                            <p id="network-rx-speed" class="text-2xl font-bold text-primary">0 KB/s</p>
+                            <p id="network-rx-total" class="text-sm text-gray-500 dark:text-gray-400">總計: 0 MB</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-500 dark:text-gray-400">上傳</h3>
+                        <div class="mt-2">
+                            <p id="network-tx-speed" class="text-2xl font-bold text-primary">0 KB/s</p>
+                            <p id="network-tx-total" class="text-sm text-gray-500 dark:text-gray-400">總計: 0 MB</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <canvas id="network-chart" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- GPU Information -->
+        <div class="bg-white dark:bg-darkBg rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">顯示卡資訊</h2>
+            <div id="gpu-info" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <p class="text-center text-gray-500 dark:text-gray-400">載入中...</p>
+            </div>
+        </div>
+
+        <!-- 智慧垃圾桶監控面板 -->
+        <div class="bg-white dark:bg-darkBg rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold flex items-center gap-2">
+                    <span>🗑️</span> 智慧垃圾桶監控
+                </h2>
+                <div class="flex items-center gap-2">
+                    <span id="trashbin-connection-dot" class="inline-block w-3 h-3 rounded-full bg-gray-400 transition-colors duration-300"></span>
+                    <span id="trashbin-connection-label" class="text-sm text-gray-500 dark:text-gray-400">等待資料...</span>
+                </div>
+            </div>
+
+            <!-- 狀態指標卡片 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <!-- 可回收數量 -->
+                <div class="bg-gray-50 dark:bg-darkInput rounded-xl p-5 flex flex-col gap-2">
+                    <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm font-medium">
+                        <span>♻️</span> 可回收數量
+                    </div>
+                    <p id="trashbin-recyclable" class="text-2xl font-bold text-primary tracking-wide">--</p>
+                    <p id="trashbin-updated-at" class="text-xs text-gray-400">尚未收到資料</p>
+                </div>
+
+                <!-- 不可回收數量 -->
+                <div class="bg-gray-50 dark:bg-darkInput rounded-xl p-5 flex flex-col gap-2">
+                    <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm font-medium">
+                        <span>🗑️</span> 不可回收數量
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <p id="trashbin-nonrecyclable" class="text-2xl font-bold" style="color: #3b82f6;">--</p>
+                    </div>
+                </div>
+
+                <!-- 狀態 -->
+                <div id="trashbin-status-card" class="bg-gray-50 dark:bg-darkInput rounded-xl p-5 flex flex-col gap-2">
+                    <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm font-medium">
+                        <span>📊</span> 垃圾總量與狀態
+                    </div>
+                    <p id="trashbin-total" class="text-2xl font-bold" style="color: #22c55e;">--</p>
+                    <p id="trashbin-alert-status" class="text-xs text-gray-400 font-bold">--</p>
+                </div>
+            </div>
+
+            <!-- 新增感測器狀態列 -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-gray-50 dark:bg-darkInput rounded-xl p-4 flex flex-col gap-1 shadow-sm border border-gray-100 dark:border-gray-800">
+                    <span class="text-gray-500 dark:text-gray-400 text-sm flex items-center gap-1"><span class="text-lg">🏷️</span> 最後辨識</span>
+                    <span id="trashbin-last-category" class="text-xl font-bold text-gray-700 dark:text-gray-200 mt-1">--</span>
+                </div>
+                <div class="bg-gray-50 dark:bg-darkInput rounded-xl p-4 flex flex-col gap-1 shadow-sm border border-gray-100 dark:border-gray-800">
+                    <span class="text-gray-500 dark:text-gray-400 text-sm flex items-center gap-1"><span class="text-lg">🔋</span> 容量佔比</span>
+                    <span id="trashbin-fill-percent" class="text-xl font-bold text-gray-700 dark:text-gray-200 mt-1">--%</span>
+                </div>
+                <div class="bg-gray-50 dark:bg-darkInput rounded-xl p-4 flex flex-col gap-1 shadow-sm border border-gray-100 dark:border-gray-800">
+                    <span class="text-gray-500 dark:text-gray-400 text-sm flex items-center gap-1"><span class="text-lg">📏</span> 超音波距離</span>
+                    <span id="trashbin-distance" class="text-xl font-bold text-gray-700 dark:text-gray-200 mt-1">-- cm</span>
+                </div>
+                <div class="bg-gray-50 dark:bg-darkInput rounded-xl p-4 flex flex-col gap-1 shadow-sm border border-gray-100 dark:border-gray-800">
+                    <span class="text-gray-500 dark:text-gray-400 text-sm flex items-center gap-1"><span class="text-lg">📦</span> 物體偵測</span>
+                    <span id="trashbin-object-present" class="text-xl font-bold text-gray-700 dark:text-gray-200 mt-1">--</span>
+                </div>
+            </div>
+
+            <!-- 垃圾總量歷史折線圖 -->
+            <div class="mb-6">
+                <h3 class="text-base font-semibold mb-3 text-gray-600 dark:text-gray-400">垃圾總量趨勢</h3>
+                <div class="relative h-48">
+                    <canvas id="trashbin-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- 服務日誌面板 -->
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-base font-semibold text-gray-600 dark:text-gray-400">服務日誌</h3>
+                    <button id="car-log-clear-btn"
+                        class="text-xs px-3 py-1 rounded-md bg-gray-100 dark:bg-darkInput text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        清除
+                    </button>
+                </div>
+                <div id="car-log-panel"
+                    class="h-40 overflow-y-auto rounded-lg bg-gray-900 p-3 font-mono text-xs leading-relaxed space-y-0.5">
+                    <p class="text-gray-500">等待服務日誌...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-sm text-gray-600 dark:text-gray-400 mb-4">
+            © 2025 管理系統. 保留所有權利.
+        </div>
+    </div>
+
+    <!-- 導入 system.js (圖表相關函數) -->
+    <script src="system.js"></script>
+    <script src="../assets/common.js"></script>
+    <script src="root_core.js"></script>
+    <!-- 車輛監控前端腳本 -->
+    <script src="car_monitor.js"></script>
+</body>
+</html>

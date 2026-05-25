@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+.idea/
+.webui_secret_key
+data/
+*.log
+.env
+node_modules/
+js/node_modules/

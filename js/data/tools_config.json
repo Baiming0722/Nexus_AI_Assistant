@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "auto_detect": true,
+  "tool_ids": [
+    "your_mcpo_tool_id_here"
+  ],
+  "tool_configs": {
+    "mcpo_tool": {
+      "id": "your_mcpo_tool_id",
+      "name": "MCP-to-OpenAPI Proxy",
+      "enabled": true,
+      "description": "MCP 工具代理服務"
+    }
+  },
+  "notes": "如果 auto_detect 為 true,將自動獲取所有可用工具。如果為 false,只使用 tool_ids 中指定的工具"
+}

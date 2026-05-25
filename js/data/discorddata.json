@@ -1,0 +1,9 @@
+{
+  "token": "Your_Discord_Bot_Token",
+  "prefix": "//",
+  "clientId": "Your_Discord_Bot_Client_ID",
+  "clientSecret": "Your_Discord_Bot_Client_Secret",
+  "REDIRECT_URI": "http://localhost:3000/callback",
+  "sessionSecret": "123",
+  "iotAlertChannelId": "Your_Discord_Bot_Channel_ID"
+}

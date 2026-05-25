@@ -1,0 +1,19 @@
+{
+  "receivedAt": "2026-05-25T14:02:33.147Z",
+  "id": 3,
+  "category": "blank",
+  "category_zh": "空白",
+  "target_bin": "無",
+  "lastUpdate": "",
+  "recyclableCount": 0,
+  "nonRecyclableCount": 0,
+  "total": 0,
+  "fill_percent": 0,
+  "alertActive": false,
+  "full_bucket": "無",
+  "top_category": "尚無資料",
+  "distance_cm": -1,
+  "object_present": false,
+  "ultrasonic_full": false,
+  "raw": ""
+}

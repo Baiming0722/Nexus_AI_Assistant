@@ -1,0 +1,16 @@
+{
+  "LLM_bot": {
+    "ip": "http://localhost:7860/api/chat/completions",
+    "mcpo_ip": "http://localhost:7861",
+    "models": "chcp 65001 && curl -s http://localhost:11434/api/tags",
+    "model": "qwen3.5:latest",
+    "apikey": "Bearer Your API KEY"
+  },
+  "༄҉͡‿҉࿑專𓍯ౣ題ళ్శ్హ": {
+    "ip": "http://localhost:11434/api/chat",
+    "mcpo_ip": "http://localhost:7861",
+    "models": "chcp 65001 && curl -s http://localhost:11434/api/tags",
+    "model": "qwen3.5:latest",
+    "apikey": ""
+  }
+}
